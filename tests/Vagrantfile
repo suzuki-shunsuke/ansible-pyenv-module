@@ -1,0 +1,23 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure(2) do |config|
+  config.vm.define "ubuntu" do |app|
+    app.vm.box = "bento/ubuntu-16.04"
+    app.vm.provider "virtualbox" do |vb|
+      vb.memory = "1024"
+    end
+    app.vm.provision "ansible" do |ansible|
+      ansible.playbook = "./test.yml"
+    end
+  end
+  config.vm.define "redhat" do |app|
+    app.vm.box = "bento/centos-7.3"
+    app.vm.provider "virtualbox" do |vb|
+      vb.memory = "1024"
+    end
+    app.vm.provision "ansible" do |ansible|
+      ansible.playbook = "./test.yml"
+    end
+  end
+end

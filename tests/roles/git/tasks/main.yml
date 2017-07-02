@@ -1,0 +1,3 @@
+- include: "{{os_families.get(ansible_os_family, 'default')}}.yml"
+  static: no
+  when: ansible_os_family in os_families

@@ -1,0 +1,102 @@
+---
+- hosts: all
+  vars:
+    pyenv_root: "{{ansible_env.HOME}}/pyenv"
+  roles:
+  - git
+  - suzuki-shunsuke.pyenv
+  - ansible-pyenv-module
+  tasks:
+  - name: pyenv install -l
+    pyenv:
+      list: yes
+      pyenv_root: "{{pyenv_root}}"
+    register: result
+    failed_when: result.changed
+  - debug:
+      var: result
+  - name: pyenv global
+    pyenv:
+      subcommand: global
+      pyenv_root: "{{pyenv_root}}"
+    register: result
+    failed_when: result.changed
+  - debug:
+      var: result
+  - name: pyenv versions --bare
+    pyenv:
+      subcommand: versions
+      pyenv_root: "{{pyenv_root}}"
+    register: result
+    failed_when: result.changed
+  - debug:
+      var: result
+  - name: pyenv install -s 3.6.1
+    pyenv:
+      version: 3.6.1
+      # force: yes
+      pyenv_root: "{{pyenv_root}}"
+    register: result
+  - debug:
+      var: result
+  - name: pyenv global 3.6.1
+    pyenv:
+      subcommand: global
+      versions:
+      - 3.6.1
+      pyenv_root: "{{pyenv_root}}"
+    register: result
+  - debug:
+      var: result
+  - name: pyenv global
+    pyenv:
+      subcommand: global
+      pyenv_root: "{{pyenv_root}}"
+    register: result
+    failed_when: result.changed
+  - debug:
+      var: result
+  - name: pyenv install -s 2.7.13
+    pyenv:
+      version: 2.7.13
+      pyenv_root: "{{pyenv_root}}"
+    register: result
+  - debug:
+      var: result
+  - name: pyenv global 2.7.13
+    pyenv:
+      subcommand: global
+      versions:
+      - 2.7.13
+      pyenv_root: "{{pyenv_root}}"
+    register: result
+    failed_when: not result.changed
+  - debug:
+      var: result
+  - name: pyenv install -s 2.7.5
+    pyenv:
+      version: 2.7.5
+      pyenv_root: "{{pyenv_root}}"
+    register: result
+  - debug:
+      var: result
+  - name: pyenv uninstall -f 2.7.4
+    pyenv:
+      subcommand: uninstall
+      version: 2.7.4
+    environment:
+      PYENV_ROOT: "{{pyenv_root}}"
+    register: result
+    failed_when: result.changed
+  - debug:
+      var: result
+  - name: pyenv uninstall -f 2.7.5
+    pyenv:
+      subcommand: uninstall
+      version: 2.7.5
+    environment:
+      PYENV_ROOT: "~/pyenv"
+    register: result
+    failed_when: not result.changed
+  - debug:
+      var: result
