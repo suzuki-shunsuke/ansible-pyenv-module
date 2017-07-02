@@ -59,10 +59,9 @@ EXAMPLES = '''
 RETURN = '''
 '''
 
-import json
-import os
+import os  # noqa E402
 
-from ansible.module_utils.basic import AnsibleModule
+from ansible.module_utils.basic import AnsibleModule  # noqa E402
 
 
 def get_all_installable_versions(module, cmd_path, **kwargs):
@@ -85,7 +84,8 @@ def cmd_all_installable_versions(module, cmd_path, **kwargs):
 
 
 def get_installed_versions(module, cmd_path, **kwargs):
-    rc, out, err = module.run_command([cmd_path, "versions", "--bare"], **kwargs)
+    rc, out, err = module.run_command(
+        [cmd_path, "versions", "--bare"], **kwargs)
     if rc:
         return (False, dict(msg=err, stdout=out))
     else:
@@ -144,13 +144,16 @@ def cmd_set_global(module, cmd_path, versions, **kwargs):
         module.fail_json(**data)
         return None
     if set(data["versions"]) == set(versions):
-        module.exit_json(versions=versions, changed=False, stdout="", stderr="")
+        module.exit_json(
+            versions=versions, changed=False, stdout="", stderr="")
         return None
-    rc, out, err = module.run_command([cmd_path, "global", " ".join(versions)], **kwargs)
+    rc, out, err = module.run_command(
+        [cmd_path, "global", " ".join(versions)], **kwargs)
     if rc:
         module.fail_json(msg=err, stdout=out)
     else:
-        module.exit_json(versions=versions, changed=True, stdout=out, stderr=err)
+        module.exit_json(
+            versions=versions, changed=True, stdout=out, stderr=err)
 
 
 MSGS = {
@@ -196,7 +199,8 @@ def main():
     cmd = [cmd_path, params["subcommand"]]
     if params["subcommand"] == "install":
         if params["list"]:
-            cmd_all_installable_versions(module, cmd_path, environ_update=environ_update)
+            cmd_all_installable_versions(
+                module, cmd_path, environ_update=environ_update)
             return None
         if params["skip"] is None:
             if params["force"] is None:
@@ -224,7 +228,8 @@ def main():
             module.fail_json(
                 msg="uninstall subcommand requires the 'version' parameter")
             return None
-        cmd_uninstall(module, cmd_path, params["version"], environ_update=environ_update)
+        cmd_uninstall(
+            module, cmd_path, params["version"], environ_update=environ_update)
         return None
     elif params["subcommand"] == "versions":
         # get_all_installable_versions(module, cmd_path)
@@ -232,7 +237,9 @@ def main():
         return None
     elif params["subcommand"] == "global":
         if params["versions"]:
-            cmd_set_global(module, cmd_path, params["versions"], environ_update=environ_update)
+            cmd_set_global(
+                module, cmd_path, params["versions"],
+                environ_update=environ_update)
         else:
             cmd_get_global(module, cmd_path, environ_update=environ_update)
         return None
