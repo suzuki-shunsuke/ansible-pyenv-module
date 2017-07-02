@@ -8,7 +8,7 @@ https://galaxy.ansible.com/suzuki-shunsuke/pyenv-module/
 
 ## Notice
 
-* This module doesn't support the check mode
+* This module doesn't support the [check mode](http://docs.ansible.com/ansible/dev_guide/developing_modules_general.html#supporting-check-mode)
 
 ## Supported platform
 
