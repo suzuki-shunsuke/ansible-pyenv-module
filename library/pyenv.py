@@ -1,6 +1,10 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+ANSIBLE_METADATA = {'metadata_version': '1.0',
+                    'status': ['preview'],
+                    'supported_by': 'community'}
+
 DOCUMENTATION = '''
 ---
 module: pyenv
@@ -54,9 +58,63 @@ author: "Suzuki Shunsuke"
 '''
 
 EXAMPLES = '''
+- name: pyenv install -s 3.6.1
+  pyenv:
+    version: 3.6.1
+    pyenv_root: "~/.pyenv"
+
+- name: pyenv install -f 3.6.1
+  pyenv:
+    version: 3.6.1
+    pyenv_root: "~/.pyenv"
+    force: yes
+
+- name: pyenv uninstall -f 2.6.9
+  pyenv:
+    subcommand: uninstall
+    version: 2.6.9
+    pyenv_root: "~/.pyenv"
+
+- name: pyenv global 3.6.1
+  pyenv:
+    subcommand: global
+    versions:
+    - 3.6.1
+    pyenv_root: "~/.pyenv"
+
+- name: pyenv global
+  pyenv:
+    subcommand: global
+    pyenv_root: "~/.pyenv"
+  register: result
+- debug:
+    var: result["versions"]
+
+- name: pyenv install -l
+  pyenv:
+    list: yes
+    pyenv_root: "{{ansible_env.HOME}}/.pyenv"
+  register: result
+- debug:
+    var: result["versions"]
+
+- name: pyenv versions --bare
+  pyenv:
+    subcommand: versions
+    pyenv_root: "{{ansible_env.HOME}}/.pyenv"
+  register: result
+- debug:
+    var: result["versions"]
 '''
 
-RETURN = '''
+RETURNS = '''
+versions:
+  description: the return value of `pyenv install --list` or `pyenv global` or `pyenv versions`
+  returned: success
+  type: list
+  sample:
+  - 2.7.13
+  - 3.6.1
 '''
 
 import os  # noqa E402
