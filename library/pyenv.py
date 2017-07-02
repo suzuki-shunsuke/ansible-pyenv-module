@@ -206,7 +206,7 @@ def cmd_set_global(module, cmd_path, versions, **kwargs):
             versions=versions, changed=False, stdout="", stderr="")
         return None
     rc, out, err = module.run_command(
-        [cmd_path, "global", " ".join(versions)], **kwargs)
+        [cmd_path, "global"] + versions, **kwargs)
     if rc:
         module.fail_json(msg=err, stdout=out)
     else:

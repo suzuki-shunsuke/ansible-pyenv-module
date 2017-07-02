@@ -39,11 +39,19 @@
     register: result
   - debug:
       var: result
-  - name: pyenv global 3.6.1
+  - name: pyenv install -s 2.7.13
+    pyenv:
+      version: 2.7.13
+      pyenv_root: "{{pyenv_root}}"
+    register: result
+  - debug:
+      var: result
+  - name: pyenv global 3.6.1 2.7.13
     pyenv:
       subcommand: global
       versions:
       - 3.6.1
+      - 2.7.13
       pyenv_root: "{{pyenv_root}}"
     register: result
   - debug:
@@ -54,13 +62,6 @@
       pyenv_root: "{{pyenv_root}}"
     register: result
     failed_when: result.changed
-  - debug:
-      var: result
-  - name: pyenv install -s 2.7.13
-    pyenv:
-      version: 2.7.13
-      pyenv_root: "{{pyenv_root}}"
-    register: result
   - debug:
       var: result
   - name: pyenv global 2.7.13
