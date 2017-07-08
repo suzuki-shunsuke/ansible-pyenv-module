@@ -153,6 +153,10 @@ The return value of the "versions" subcommand has "versions" field.
     var: result["versions"]
 ```
 
+## Change Log
+
+See [CHANGELOG.md](CHANGELOG.md).
+
 ## Licence
 
 [MIT](LICENSE)
@@ -163,10 +167,13 @@ The return value of the "versions" subcommand has "versions" field.
 
 * Vagrant
 * Ansible
+* Node.js
+* yarn
 
 ### Setup
 
 ```
+$ yarn install
 $ cd tests
 $ ansible-galaxy install -r roles.yml
 ```
