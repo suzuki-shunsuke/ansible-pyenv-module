@@ -262,17 +262,17 @@ def get_pyenv_root(params):
 
 def main():
     module = AnsibleModule(argument_spec={
-        "version": {"required": False, "type": "str", "default": None},
-        "versions": {"required": False, "type": "list", "default": None},
+        "force": {"required": False, "type": "bool", "default": None},
+        "expanduser": {"required": False, "type": "bool", "default": True},
+        "list": {"required": False, "type": "bool", "default": False},
         "pyenv_root": {"required": False, "default": None},
+        "skip_existing": {"required": False, "type": "bool", "default": None},
         "subcommand": {
             "required": False, "default": "install",
             "choices": ["install", "uninstall", "versions", "global"]
         },
-        "force": {"required": False, "type": "bool", "default": None},
-        "skip_existing": {"required": False, "type": "bool", "default": None},
-        "expanduser": {"required": False, "type": "bool", "default": True},
-        "list": {"required": False, "type": "bool", "default": False},
+        "version": {"required": False, "type": "str", "default": None},
+        "versions": {"required": False, "type": "list", "default": None},
     })
     params = module.params
     environ_update = {}
