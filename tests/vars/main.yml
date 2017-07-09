@@ -1,0 +1,15 @@
+pyenv_root: "{{ansible_env.HOME}}/pyenv"
+pyenv_is_dependencies_installed: yes
+# https://github.com/suzuki-shunsuke/ansible-pyenv/blob/master/defaults/main.yml
+pyenv_redhat_build_dependencies:
+# additional dependencies
+- gcc
+- patch
+# default dependencies
+- zlib-devel
+- bzip2
+- bzip2-devel
+- readline-devel
+- sqlite
+- sqlite-devel
+- openssl-devel

@@ -1,7 +1,7 @@
 ---
 - hosts: all
-  vars:
-    pyenv_root: "{{ansible_env.HOME}}/pyenv"
+  vars_files:
+  - vars/main.yml
   roles:
   - git
   - suzuki-shunsuke.pyenv
