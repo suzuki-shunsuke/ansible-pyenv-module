@@ -218,6 +218,47 @@ def cmd_set_global(module, cmd_path, versions, **kwargs):
             versions=versions)
 
 
+def cmd_install(module, params, cmd_path, **kwargs):
+    cmd = [cmd_path, "install"]
+    if params["skip_existing"] is None:
+        if params["force"] is None:
+            force = False
+            cmd.append("-s")
+        elif params["force"] is True:
+            force = True
+            cmd.append("-f")
+        else:
+            force = False
+            cmd.append("-s")
+    else:
+        if params["skip_existing"] is True:
+            force = False
+            cmd.append("-s")
+        else:
+            # skip_existing: False
+            if params["force"] is True:
+                force = True
+                cmd.append("-f")
+            else:
+                force = False
+
+    cmd.append(params["version"])
+
+    rc, out, err = module.run_command(cmd, **kwargs)
+    if rc:
+        return module.fail_json(msg=err, stdout=out)
+    else:
+        if force:
+            changed = True
+        else:
+            if out:
+                changed = True
+            else:
+                changed = False
+        return module.exit_json(
+            changed=changed, failed=False, stdout=out, stderr=err)
+
+
 MSGS = {
     "required_pyenv_root": (
         "Either the environment variable 'PYENV_ROOT' "
@@ -263,48 +304,12 @@ def main():
     environ_update["PYENV_ROOT"] = pyenv_root
     cmd_path = os.path.join(pyenv_root, "bin", "pyenv")
 
-    cmd = [cmd_path, params["subcommand"]]
     if params["subcommand"] == "install":
         if params["list"]:
             return cmd_install_list(
                 module, cmd_path, environ_update=environ_update)
-        if params["skip_existing"] is None:
-            if params["force"] is None:
-                force = False
-                cmd.append("-s")
-            elif params["force"] is True:
-                force = True
-                cmd.append("-f")
-            else:
-                force = False
-                cmd.append("-s")
-        else:
-            if params["skip_existing"] is True:
-                force = False
-                cmd.append("-s")
-            else:
-                # skip_existing: False
-                if params["force"] is True:
-                    force = True
-                    cmd.append("-f")
-                else:
-                    force = False
-
-        cmd.append(params["version"])
-
-        rc, out, err = module.run_command(cmd, environ_update=environ_update)
-        if rc:
-            return module.fail_json(msg=err, stdout=out)
-        else:
-            if force:
-                changed = True
-            else:
-                if out:
-                    changed = True
-                else:
-                    changed = False
-            return module.exit_json(
-                changed=changed, failed=False, stdout=out, stderr=err)
+        return cmd_install(
+            module, params, cmd_path, environ_update=environ_update)
     elif params["subcommand"] == "uninstall":
         if not params["version"]:
             return module.fail_json(
