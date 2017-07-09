@@ -10,6 +10,42 @@ DOCUMENTATION = '''
 module: pyenv
 short_description: Run pyenv command
 options:
+  expanduser:
+    description:
+    - whether the environment variable PYENV_ROOT and "pyenv_root" option are filtered by os.path.expanduser
+    required: false
+    type: bool
+    default: true
+  force:
+    description:
+    - the "-f/--force" option of pyenv install
+    required: false
+    type: bool
+    default: false
+  list:
+    description:
+    - -l/--list option of pyenv install command
+    required: false
+    type: bool
+    default: false
+  pyenv_root:
+    description:
+    - PYENV_ROOT
+    required: false
+    type: str
+    default: null
+  skip:
+    description:
+    - the "-s/--skip-existing" option of pyenv install
+    required: false
+    type: bool
+    default: true
+  subcommand:
+    description:
+    - pyenv subcommand
+    choices: ["install", "uninstall", "versions", "global"]
+    required: false
+    default: install
   version:
     description:
     - A python version name
@@ -22,36 +58,6 @@ options:
     type: list
     required: false
     default: null
-  subcommand:
-    description:
-    - pyenv subcommand
-    choices: ["install", "uninstall", "versions", "global"]
-    required: false
-    default: install
-  pyenv_root:
-    description:
-      - PYENV_ROOT
-    required: false
-    type: str
-    default: null
-  force:
-    description:
-    - the "-f/--force" option of pyenv install
-    required: false
-    type: bool
-    default: false
-  skip:
-    description:
-    - the "-s/--skip-existing" option of pyenv install
-    required: false
-    type: bool
-    default: true
-  expanduser:
-    description:
-    - whether the environment variable PYENV_ROOT and "pyenv_root" option are filtered by os.path.expanduser
-    required: false
-    type: bool
-    default: true
 requirements:
 - pyenv
 author: "Suzuki Shunsuke"
