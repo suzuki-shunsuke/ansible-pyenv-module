@@ -289,6 +289,22 @@ def main():
                     cmd.append("-f")
                 else:
                     force = False
+
+        cmd.append(params["version"])
+
+        rc, out, err = module.run_command(cmd, environ_update=environ_update)
+        if rc:
+            return module.fail_json(msg=err, stdout=out)
+        else:
+            if force:
+                changed = True
+            else:
+                if out:
+                    changed = True
+                else:
+                    changed = False
+            return module.exit_json(
+                changed=changed, failed=False, stdout=out, stderr=err)
     elif params["subcommand"] == "uninstall":
         if not params["version"]:
             return module.fail_json(
@@ -305,20 +321,6 @@ def main():
         else:
             return cmd_get_global(
                 module, cmd_path, environ_update=environ_update)
-    cmd.append(params["version"])
-
-    rc, out, err = module.run_command(cmd, environ_update=environ_update)
-    if rc:
-        module.fail_json(msg=err, stdout=out)
-    else:
-        if force:
-            changed = True
-        else:
-            if out:
-                changed = True
-            else:
-                changed = False
-        module.exit_json(changed=changed, failed=False, stdout=out, stderr=err)
 
 
 if __name__ == '__main__':
