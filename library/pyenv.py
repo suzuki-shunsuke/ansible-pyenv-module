@@ -193,7 +193,7 @@ cmd_versions = wrap_get_func(get_versions)
 
 
 def cmd_uninstall(module, cmd_path, version, **kwargs):
-    result, data = get_versions(module, cmd_path, **kwargs)
+    result, data = get_versions(module, cmd_path, True, **kwargs)
     if not result:
         return module.fail_json(**data)
     if version not in data["versions"]:
