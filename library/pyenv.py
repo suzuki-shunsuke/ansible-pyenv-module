@@ -55,7 +55,7 @@ options:
   subcommand:
     description:
     - pyenv subcommand
-    choices: ["install", "uninstall", "versions", "global", "virtualenvs"]
+    choices: ["install", "uninstall", "versions", "global", "virtualenv", "virtualenvs"]
     required: false
     default: install
   version:
@@ -68,6 +68,12 @@ options:
     description:
     - python version names
     type: list
+    required: false
+    default: null
+  virtualenv_name:
+    description:
+    - A virtualenv name
+    type: str
     required: false
     default: null
 requirements:
@@ -131,9 +137,24 @@ EXAMPLES = '''
   register: result
 - debug:
     var: result.virtualenvs
+
+- name: pyenv virtualenv --force 2.7.13 ansible
+  pyenv:
+    subcommand: virtualenv
+    pyenv_root: "~/.pyenv"
+    version: 2.7.13
+    virtualenv_name: ansible
+    force: yes
 '''
 
 RETURNS = '''
+virtualenvs:
+  description: the return value of `pyenv virtualenvs`
+  returned: success
+  type: list
+  sample:
+  - 3.6.1/envs/neovim
+  - neovim
 versions:
   description: the return value of `pyenv install --list` or `pyenv global` or `pyenv versions`
   returned: success
@@ -160,6 +181,8 @@ def wrap_get_func(func):
 
 
 def get_install_list(module, cmd_path, **kwargs):
+    """ pyenv install --list
+    """
     rc, out, err = module.run_command([cmd_path, "install", "-l"], **kwargs)
     if rc:
         return (False, dict(msg=err, stdout=out))
@@ -175,6 +198,8 @@ cmd_install_list = wrap_get_func(get_install_list)
 
 
 def get_versions(module, cmd_path, bare, **kwargs):
+    """ pyenv versions [--bare]
+    """
     cmd = [cmd_path, "versions"]
     if bare:
         cmd.append("--bare")
@@ -193,6 +218,8 @@ cmd_versions = wrap_get_func(get_versions)
 
 
 def cmd_uninstall(module, cmd_path, version, **kwargs):
+    """ pyenv uninstall --force <version>
+    """
     result, data = get_versions(module, cmd_path, True, **kwargs)
     if not result:
         return module.fail_json(**data)
@@ -208,6 +235,8 @@ def cmd_uninstall(module, cmd_path, version, **kwargs):
 
 
 def get_global(module, cmd_path, **kwargs):
+    """ pyenv global
+    """
     rc, out, err = module.run_command([cmd_path, "global"], **kwargs)
     if rc:
         return (False, dict(msg=err, stdout=out))
@@ -223,6 +252,8 @@ cmd_get_global = wrap_get_func(get_global)
 
 
 def cmd_set_global(module, cmd_path, versions, **kwargs):
+    """ pyenv global <version> [<version> ...]
+    """
     result, data = get_global(module, cmd_path, **kwargs)
     if not result:
         return module.fail_json(**data)
@@ -241,6 +272,8 @@ def cmd_set_global(module, cmd_path, versions, **kwargs):
 
 
 def cmd_install(module, params, cmd_path, **kwargs):
+    """ pyenv install [--skip-existing] [--force] <version>
+    """
     cmd = [cmd_path, "install"]
     if params["skip_existing"] is not False:
         force = False
@@ -261,6 +294,8 @@ def cmd_install(module, params, cmd_path, **kwargs):
 
 
 def get_virtualenvs(module, cmd_path, skip_aliases, bare, **kwargs):
+    """ pyenv virtualenvs [--skip-aliases] [--bare]
+    """
     cmd = [cmd_path, "virtualenvs"]
     if skip_aliases:
         cmd.append("--skip-aliases")
@@ -278,6 +313,45 @@ def get_virtualenvs(module, cmd_path, skip_aliases, bare, **kwargs):
 
 
 cmd_virtualenvs = wrap_get_func(get_virtualenvs)
+
+
+def cmd_virtualenv(
+        module, cmd_path, version, virtualenv_name, force, **kwargs):
+    """ pyenv virtualenv [--force] <version> <virtualenv name>
+    """
+    cmd = [cmd_path, "virtualenv"]
+    if force:
+        cmd.append("--force")
+        rc, out, err = module.run_command(cmd, **kwargs)
+        if rc:
+            return module.fail_json(msg=err, stdout=out)
+        else:
+            return module.exit_json(
+                changed=True, failed=False, stdout=out, stderr=err)
+
+    result, data = get_virtualenvs(module, cmd_path, False, True, **kwargs)
+    if not result:
+        return module.fail_json(**data)
+    virtualenvs = set(data["virtualenvs"])
+    if virtualenv_name in virtualenvs:
+        if "{}/envs/{}".format(version, virtualenv_name) in virtualenvs:
+            return module.exit_json(
+                changed=False, failed=False,
+                stdout="{} already exists".format(virtualenv_name), stderr="")
+        else:
+            return module.fail_json(
+                msg="{} already exists but version differs".format(
+                    virtualenv_name))
+
+    cmd.append(version)
+    cmd.append(virtualenv_name)
+
+    rc, out, err = module.run_command(cmd, **kwargs)
+    if rc:
+        return module.fail_json(msg=err, stdout=out)
+    else:
+        return module.exit_json(
+            changed=True, failed=False, stdout=out, stderr=err)
 
 
 MSGS = {
@@ -314,10 +388,12 @@ def main():
         "subcommand": {
             "required": False, "default": "install",
             "choices": [
-                "install", "uninstall", "versions", "global", "virtualenvs"]
+                "install", "uninstall", "versions", "global",
+                "virtualenv", "virtualenvs"]
         },
         "version": {"required": False, "type": "str", "default": None},
         "versions": {"required": False, "type": "list", "default": None},
+        "virtualenv_name": {"required": False, "type": "str", "default": None},
     })
     params = module.params
     environ_update = {}
@@ -355,6 +431,18 @@ def main():
         return cmd_virtualenvs(
             module, cmd_path, params["skip_aliases"], params["bare"],
             environ_update=environ_update)
+    elif params["subcommand"] == "virtualenv":
+        if not params["version"]:
+            return module.fail_json(
+                msg="virtualenv subcommand requires the 'version' parameter")
+        if not params["virtualenv_name"]:
+            return module.fail_json(
+                msg=(
+                    "virtualenv subcommand requires the 'virtualenv_name' "
+                    "parameter"))
+        return cmd_virtualenv(
+            module, cmd_path, params["version"], params["virtualenv_name"],
+            params["force"], environ_update=environ_update)
 
 
 if __name__ == '__main__':

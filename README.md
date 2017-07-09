@@ -25,7 +25,7 @@ We test this module in
 
 * [pyenv](https://github.com/pyenv/pyenv)
 * [python build dependencies](https://github.com/pyenv/pyenv/wiki/Common-build-problems#requirements)
-* [pyenv-virtualenv](https://github.com/pyenv/pyenv-virtualenv): required if you want to run `virtualenvs` subcommand
+* [pyenv-virtualenv](https://github.com/pyenv/pyenv-virtualenv): required if you want to run `virtualenv` or `virtualenvs` subcommand
 
 If you want to install pyenv and python build dependencies with ansible role, we recommend the [suzuki-shunsuke.pyenv](https://galaxy.ansible.com/suzuki-shunsuke/pyenv/).
 And if you want to install pyenv-virtualenv with ansible role, we recommend the [suzuki-shunsuke.pyenv-virtualenv](https://galaxy.ansible.com/suzuki-shunsuke/pyenv-virtualenv/).
@@ -39,13 +39,11 @@ $ pyenv install -l
 $ pyenv versions [--bare]
 $ pyenv global
 $ pyenv global <versions>
+$ pyenv virtualenv [-f|--force] [version] <virtualenv-name>
 $ pyenv virtualenvs [--bare] [--skip-aliases]
 ```
 
 ## Install
-
-This module is distributed in the Ansible Galaxy.
-So you can install this by `ansible-galaxy` command.
 
 ```
 $ ansible-galaxy install suzuki-shunsuke.pyenv-module
@@ -68,7 +66,7 @@ In addition to this document, please see [pyenv command reference](https://githu
 
 name | type | required | default | choices / example | description
 --- | --- | --- | --- | --- | ---
-subcommand | str | no | install | [install, uninstall, versions, global, virtualenvs] |
+subcommand | str | no | install | [install, uninstall, versions, global, virtualenvs, virtualenv] |
 pyenv_root | str | no | | ~/.pyenv | If the environment variable "PYENV_ROOT" is not set, this option is required
 expanduser | bool | no | yes | | By default the environment variable PYENV_ROOT and "pyenv_root" option are filtered by [os.path.expanduser](https://docs.python.org/2.7/library/os.path.html#os.path.expanduser)
 
@@ -114,6 +112,14 @@ skip_aliases | bool | no | yes | |
 bare | bool | no | yes | |
 
 The return value of the "virtualenvs" subcommand has "virtualenvs" field.
+
+### Options of the "virtualenv" subcommand
+
+parameter | type | required | default | example | description
+--- | --- | --- | --- | --- | ---
+force | bool | no | no | |
+version | str | yes | | 2.7.13 |
+virtualenv_name | str | yes | | ansible |
 
 ## Example
 
@@ -173,6 +179,14 @@ The return value of the "virtualenvs" subcommand has "virtualenvs" field.
   register: result
 - debug:
     var: result.virtualenvs
+
+- name: pyenv virtualenv --force 2.7.13 ansible
+  pyenv:
+    subcommand: virtualenv
+    pyenv_root: "~/.pyenv"
+    version: 2.7.13
+    virtualenv_name: ansible
+    force: yes
 ```
 
 ## Change Log

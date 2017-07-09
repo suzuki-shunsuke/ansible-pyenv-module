@@ -76,6 +76,15 @@
     register: result
   - debug:
       var: result
+  - name: pyenv virtualenv 3.6.1 neovim
+    pyenv:
+      subcommand: virtualenv
+      pyenv_root: "{{pyenv_root}}"
+      version: 3.6.1
+      virtualenv_name: neovim
+    register: result
+  - debug:
+      var: result
   - name: pyenv install -s 2.7.13
     pyenv:
       version: 2.7.13
