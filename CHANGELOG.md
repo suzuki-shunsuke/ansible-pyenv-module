@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="2.2.0"></a>
+# [2.2.0](https://github.com/suzuki-shunsuke/ansible-pyenv-module/compare/v2.1.0...v2.2.0) (2017-07-09)
+
+
+### Features
+
+* add "virtualenv" subcommand ([525cf64](https://github.com/suzuki-shunsuke/ansible-pyenv-module/commit/525cf64))
+
+
+
 <a name="2.1.0"></a>
 # [2.1.0](https://github.com/suzuki-shunsuke/ansible-pyenv-module/compare/v2.0.1...v2.1.0) (2017-07-09)
 
