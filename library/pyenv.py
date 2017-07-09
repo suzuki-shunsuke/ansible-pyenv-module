@@ -55,7 +55,7 @@ options:
   subcommand:
     description:
     - pyenv subcommand
-    choices: ["install", "uninstall", "versions", "global", "virtualenvs"]
+    choices: ["install", "uninstall", "versions", "global", "virtualenv", "virtualenvs"]
     required: false
     default: install
   version:
@@ -68,6 +68,12 @@ options:
     description:
     - python version names
     type: list
+    required: false
+    default: null
+  virtualenv_name:
+    description:
+    - A virtualenv name
+    type: str
     required: false
     default: null
 requirements:
@@ -131,6 +137,14 @@ EXAMPLES = '''
   register: result
 - debug:
     var: result.virtualenvs
+
+- name: pyenv virtualenv --force 2.7.13 ansible
+  pyenv:
+    subcommand: virtualenv
+    pyenv_root: "~/.pyenv"
+    version: 2.7.13
+    virtualenv_name: ansible
+    force: yes
 '''
 
 RETURNS = '''
@@ -294,6 +308,45 @@ def get_virtualenvs(module, cmd_path, skip_aliases, bare, **kwargs):
 cmd_virtualenvs = wrap_get_func(get_virtualenvs)
 
 
+def cmd_virtualenv(
+        module, cmd_path, version, virtualenv_name, force, **kwargs):
+    """ pyenv virtualenv [--force] <version> <virtualenv name>
+    """
+    cmd = [cmd_path, "virtualenv"]
+    if force:
+        cmd.append("--force")
+        rc, out, err = module.run_command(cmd, **kwargs)
+        if rc:
+            return module.fail_json(msg=err, stdout=out)
+        else:
+            return module.exit_json(
+                changed=True, failed=False, stdout=out, stderr=err)
+
+    result, data = get_virtualenvs(module, cmd_path, False, True, **kwargs)
+    if not result:
+        return module.fail_json(**data)
+    virtualenvs = set(data["virtualenvs"])
+    if virtualenv_name in virtualenvs:
+        if "{}/envs/{}".format(version, virtualenv_name) in virtualenvs:
+            return module.exit_json(
+                changed=False, failed=False,
+                stdout="{} already exists".format(virtualenv_name), stderr="")
+        else:
+            return module.fail_json(
+                msg="{} already exists but version differs".format(
+                    virtualenv_name))
+
+    cmd.append(version)
+    cmd.append(virtualenv_name)
+
+    rc, out, err = module.run_command(cmd, **kwargs)
+    if rc:
+        return module.fail_json(msg=err, stdout=out)
+    else:
+        return module.exit_json(
+            changed=True, failed=False, stdout=out, stderr=err)
+
+
 MSGS = {
     "required_pyenv_root": (
         "Either the environment variable 'PYENV_ROOT' "
@@ -328,10 +381,12 @@ def main():
         "subcommand": {
             "required": False, "default": "install",
             "choices": [
-                "install", "uninstall", "versions", "global", "virtualenvs"]
+                "install", "uninstall", "versions", "global",
+                "virtualenv", "virtualenvs"]
         },
         "version": {"required": False, "type": "str", "default": None},
         "versions": {"required": False, "type": "list", "default": None},
+        "virtualenv_name": {"required": False, "type": "str", "default": None},
     })
     params = module.params
     environ_update = {}
@@ -369,6 +424,18 @@ def main():
         return cmd_virtualenvs(
             module, cmd_path, params["skip_aliases"], params["bare"],
             environ_update=environ_update)
+    elif params["subcommand"] == "virtualenv":
+        if not params["version"]:
+            return module.fail_json(
+                msg="virtualenv subcommand requires the 'version' parameter")
+        if not params["virtualenv_name"]:
+            return module.fail_json(
+                msg=(
+                    "virtualenv subcommand requires the 'virtualenv_name' "
+                    "parameter"))
+        return cmd_virtualenv(
+            module, cmd_path, params["version"], params["virtualenv_name"],
+            params["force"], environ_update=environ_update)
 
 
 if __name__ == '__main__':
