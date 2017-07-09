@@ -220,27 +220,12 @@ def cmd_set_global(module, cmd_path, versions, **kwargs):
 
 def cmd_install(module, params, cmd_path, **kwargs):
     cmd = [cmd_path, "install"]
-    if params["skip_existing"] is None:
-        if params["force"] is None:
-            force = False
-            cmd.append("-s")
-        elif params["force"] is True:
-            force = True
-            cmd.append("-f")
-        else:
-            force = False
-            cmd.append("-s")
-    else:
-        if params["skip_existing"] is True:
-            force = False
-            cmd.append("-s")
-        else:
-            # skip_existing: False
-            if params["force"] is True:
-                force = True
-                cmd.append("-f")
-            else:
-                force = False
+    if params["skip_existing"] is not False:
+        force = False
+        cmd.append("--skip-existing")
+    elif params["force"] is True:
+        force = True
+        cmd.append("--force")
 
     cmd.append(params["version"])
 
@@ -248,13 +233,7 @@ def cmd_install(module, params, cmd_path, **kwargs):
     if rc:
         return module.fail_json(msg=err, stdout=out)
     else:
-        if force:
-            changed = True
-        else:
-            if out:
-                changed = True
-            else:
-                changed = False
+        changed = force or out
         return module.exit_json(
             changed=changed, failed=False, stdout=out, stderr=err)
 
