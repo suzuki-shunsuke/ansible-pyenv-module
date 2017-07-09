@@ -128,7 +128,18 @@ import os  # noqa E402
 from ansible.module_utils.basic import AnsibleModule  # noqa E402
 
 
-def get_all_installable_versions(module, cmd_path, **kwargs):
+def wrap_get_func(func):
+    def wrap(module, *args, **kwargs):
+        result, data = func(module, *args, **kwargs)
+        if result:
+            module.exit_json(**data)
+        else:
+            module.fail_json(**data)
+
+    return wrap
+
+
+def get_install_list(module, cmd_path, **kwargs):
     rc, out, err = module.run_command([cmd_path, "install", "-l"], **kwargs)
     if rc:
         return (False, dict(msg=err, stdout=out))
@@ -140,15 +151,10 @@ def get_all_installable_versions(module, cmd_path, **kwargs):
             versions=versions))
 
 
-def cmd_all_installable_versions(module, cmd_path, **kwargs):
-    result, data = get_all_installable_versions(module, cmd_path, **kwargs)
-    if result:
-        module.exit_json(**data)
-    else:
-        module.fail_json(**data)
+cmd_install_list = wrap_get_func(get_install_list)
 
 
-def get_installed_versions(module, cmd_path, **kwargs):
+def get_versions(module, cmd_path, **kwargs):
     rc, out, err = module.run_command(
         [cmd_path, "versions", "--bare"], **kwargs)
     if rc:
@@ -161,22 +167,16 @@ def get_installed_versions(module, cmd_path, **kwargs):
             versions=versions))
 
 
-def cmd_installed_versions(module, cmd_path, **kwargs):
-    result, data = get_installed_versions(module, cmd_path, **kwargs)
-    if result:
-        module.exit_json(**data)
-    else:
-        module.fail_json(**data)
+cmd_versions = wrap_get_func(get_versions)
 
 
 def cmd_uninstall(module, cmd_path, version, **kwargs):
-    result, data = get_installed_versions(module, cmd_path, **kwargs)
+    result, data = get_versions(module, cmd_path, **kwargs)
     if not result:
-        module.fail_json(**data)
-        return None
+        return module.fail_json(**data)
     if version not in data["versions"]:
-        module.exit_json(changed=False, failed=False, stdout="", stderr="")
-        return None
+        return module.exit_json(
+            changed=False, failed=False, stdout="", stderr="")
     cmd = [cmd_path, "uninstall", "-f", version]
     rc, out, err = module.run_command(cmd, **kwargs)
     if rc:
@@ -197,24 +197,17 @@ def get_global(module, cmd_path, **kwargs):
             versions=versions))
 
 
-def cmd_get_global(module, cmd_path, **kwargs):
-    result, data = get_global(module, cmd_path, **kwargs)
-    if result:
-        module.exit_json(**data)
-    else:
-        module.fail_json(**data)
+cmd_get_global = wrap_get_func(get_global)
 
 
 def cmd_set_global(module, cmd_path, versions, **kwargs):
     result, data = get_global(module, cmd_path, **kwargs)
     if not result:
-        module.fail_json(**data)
-        return None
+        return module.fail_json(**data)
     if set(data["versions"]) == set(versions):
-        module.exit_json(
+        return module.exit_json(
             changed=False, failed=False, stdout="", stderr="",
             versions=versions)
-        return None
     rc, out, err = module.run_command(
         [cmd_path, "global"] + versions, **kwargs)
     if rc:
@@ -225,11 +218,46 @@ def cmd_set_global(module, cmd_path, versions, **kwargs):
             versions=versions)
 
 
+def cmd_install(module, params, cmd_path, **kwargs):
+    cmd = [cmd_path, "install"]
+    if params["skip_existing"] is not False:
+        force = False
+        cmd.append("--skip-existing")
+    elif params["force"] is True:
+        force = True
+        cmd.append("--force")
+
+    cmd.append(params["version"])
+
+    rc, out, err = module.run_command(cmd, **kwargs)
+    if rc:
+        return module.fail_json(msg=err, stdout=out)
+    else:
+        changed = force or out
+        return module.exit_json(
+            changed=changed, failed=False, stdout=out, stderr=err)
+
+
 MSGS = {
     "required_pyenv_root": (
         "Either the environment variable 'PYENV_ROOT' "
         "or 'pyenv_root' option is required")
 }
+
+
+def get_pyenv_root(params):
+    if params["pyenv_root"]:
+        if params["expanduser"]:
+            return os.path.expanduser(params["pyenv_root"])
+        else:
+            return params["pyenv_root"]
+    else:
+        if "PYENV_ROOT" not in os.environ:
+            return None
+        if params["expanduser"]:
+            return os.path.expanduser(os.environ["PYENV_ROOT"])
+        else:
+            return os.environ["PYENV_ROOT"]
 
 
 def main():
@@ -248,84 +276,35 @@ def main():
     })
     params = module.params
     environ_update = {}
-    if params["pyenv_root"]:
-        if params["expanduser"]:
-            pyenv_root = os.path.expanduser(params["pyenv_root"])
-        else:
-            pyenv_root = params["pyenv_root"]
-    else:
-        if "PYENV_ROOT" not in os.environ:
-            module.fail_json(
-                msg=MSGS["required_pyenv_root"])
-            return None
-        if params["expanduser"]:
-            pyenv_root = os.path.expanduser(os.environ["PYENV_ROOT"])
-        else:
-            pyenv_root = os.environ["PYENV_ROOT"]
+    pyenv_root = get_pyenv_root(params)
+    if pyenv_root is None:
+        return module.fail_json(
+            msg=MSGS["required_pyenv_root"])
     environ_update["PYENV_ROOT"] = pyenv_root
     cmd_path = os.path.join(pyenv_root, "bin", "pyenv")
 
-    cmd = [cmd_path, params["subcommand"]]
     if params["subcommand"] == "install":
         if params["list"]:
-            cmd_all_installable_versions(
+            return cmd_install_list(
                 module, cmd_path, environ_update=environ_update)
-            return None
-        if params["skip_existing"] is None:
-            if params["force"] is None:
-                force = False
-                cmd.append("-s")
-            elif params["force"] is True:
-                force = True
-                cmd.append("-f")
-            else:
-                force = False
-                cmd.append("-s")
-        else:
-            if params["skip_existing"] is True:
-                force = False
-                cmd.append("-s")
-            else:
-                # skip_existing: False
-                if params["force"] is True:
-                    force = True
-                    cmd.append("-f")
-                else:
-                    force = False
+        return cmd_install(
+            module, params, cmd_path, environ_update=environ_update)
     elif params["subcommand"] == "uninstall":
         if not params["version"]:
-            module.fail_json(
+            return module.fail_json(
                 msg="uninstall subcommand requires the 'version' parameter")
-            return None
-        cmd_uninstall(
+        return cmd_uninstall(
             module, cmd_path, params["version"], environ_update=environ_update)
-        return None
     elif params["subcommand"] == "versions":
-        # get_all_installable_versions(module, cmd_path)
-        cmd_installed_versions(module, cmd_path, environ_update=environ_update)
-        return None
+        return cmd_versions(module, cmd_path, environ_update=environ_update)
     elif params["subcommand"] == "global":
         if params["versions"]:
-            cmd_set_global(
+            return cmd_set_global(
                 module, cmd_path, params["versions"],
                 environ_update=environ_update)
         else:
-            cmd_get_global(module, cmd_path, environ_update=environ_update)
-        return None
-    cmd.append(params["version"])
-
-    rc, out, err = module.run_command(cmd, environ_update=environ_update)
-    if rc:
-        module.fail_json(msg=err, stdout=out)
-    else:
-        if force:
-            changed = True
-        else:
-            if out:
-                changed = True
-            else:
-                changed = False
-        module.exit_json(changed=changed, failed=False, stdout=out, stderr=err)
+            return cmd_get_global(
+                module, cmd_path, environ_update=environ_update)
 
 
 if __name__ == '__main__':
