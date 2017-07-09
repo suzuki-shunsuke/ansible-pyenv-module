@@ -228,6 +228,21 @@ MSGS = {
 }
 
 
+def get_pyenv_root(params):
+    if params["pyenv_root"]:
+        if params["expanduser"]:
+            return os.path.expanduser(params["pyenv_root"])
+        else:
+            return params["pyenv_root"]
+    else:
+        if "PYENV_ROOT" not in os.environ:
+            return None
+        if params["expanduser"]:
+            return os.path.expanduser(os.environ["PYENV_ROOT"])
+        else:
+            return os.environ["PYENV_ROOT"]
+
+
 def main():
     module = AnsibleModule(argument_spec={
         "version": {"required": False, "type": "str", "default": None},
@@ -244,20 +259,10 @@ def main():
     })
     params = module.params
     environ_update = {}
-    if params["pyenv_root"]:
-        if params["expanduser"]:
-            pyenv_root = os.path.expanduser(params["pyenv_root"])
-        else:
-            pyenv_root = params["pyenv_root"]
-    else:
-        if "PYENV_ROOT" not in os.environ:
-            module.fail_json(
-                msg=MSGS["required_pyenv_root"])
-            return None
-        if params["expanduser"]:
-            pyenv_root = os.path.expanduser(os.environ["PYENV_ROOT"])
-        else:
-            pyenv_root = os.environ["PYENV_ROOT"]
+    pyenv_root = get_pyenv_root(params)
+    if pyenv_root is None:
+        return module.fail_json(
+            msg=MSGS["required_pyenv_root"])
     environ_update["PYENV_ROOT"] = pyenv_root
     cmd_path = os.path.join(pyenv_root, "bin", "pyenv")
 
