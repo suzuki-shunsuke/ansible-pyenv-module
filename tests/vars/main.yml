@@ -1,3 +1,4 @@
+nonroot: "{{ (ansible_env.USER is undefined) | ternary(ansible_env.HOME != '/root', ansible_env.USER != 'root') }}"
 pyenv_root: "{{ansible_env.HOME}}/pyenv"
 pyenv_is_dependencies_installed: yes
 # https://github.com/suzuki-shunsuke/ansible-pyenv/blob/master/defaults/main.yml

@@ -1,5 +1,0 @@
-nonroot: "{{ (ansible_env.USER is undefined) | ternary(ansible_env.HOME != '/root', ansible_env.USER != 'root') }}"
-os_families:
-  RedHat: RedHat
-  Debian: Debian
-  Darwin: Darwin
