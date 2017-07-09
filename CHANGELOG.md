@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="2.1.0"></a>
+# [2.1.0](https://github.com/suzuki-shunsuke/ansible-pyenv-module/compare/v2.0.1...v2.1.0) (2017-07-09)
+
+
+### Bug Fixes
+
+* fix a bug ([31d501b](https://github.com/suzuki-shunsuke/ansible-pyenv-module/commit/31d501b))
+
+
+### Features
+
+* add "bare" option to "versions" subcommand ([362a38f](https://github.com/suzuki-shunsuke/ansible-pyenv-module/commit/362a38f))
+* add "virtualenvs" subcommand ([757e38f](https://github.com/suzuki-shunsuke/ansible-pyenv-module/commit/757e38f))
+
+
+
 <a name="2.0.1"></a>
 ## [2.0.1](https://github.com/suzuki-shunsuke/ansible-pyenv-module/compare/v2.0.0...v2.0.1) (2017-07-09)
 
