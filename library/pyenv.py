@@ -148,7 +148,7 @@ def cmd_install_list(module, cmd_path, **kwargs):
         module.fail_json(**data)
 
 
-def get_installed_versions(module, cmd_path, **kwargs):
+def get_versions(module, cmd_path, **kwargs):
     rc, out, err = module.run_command(
         [cmd_path, "versions", "--bare"], **kwargs)
     if rc:
@@ -161,8 +161,8 @@ def get_installed_versions(module, cmd_path, **kwargs):
             versions=versions))
 
 
-def cmd_installed_versions(module, cmd_path, **kwargs):
-    result, data = get_installed_versions(module, cmd_path, **kwargs)
+def cmd_versions(module, cmd_path, **kwargs):
+    result, data = get_versions(module, cmd_path, **kwargs)
     if result:
         module.exit_json(**data)
     else:
@@ -170,7 +170,7 @@ def cmd_installed_versions(module, cmd_path, **kwargs):
 
 
 def cmd_uninstall(module, cmd_path, version, **kwargs):
-    result, data = get_installed_versions(module, cmd_path, **kwargs)
+    result, data = get_versions(module, cmd_path, **kwargs)
     if not result:
         module.fail_json(**data)
         return None
@@ -302,7 +302,7 @@ def main():
         return None
     elif params["subcommand"] == "versions":
         # get_install_list(module, cmd_path)
-        cmd_installed_versions(module, cmd_path, environ_update=environ_update)
+        cmd_versions(module, cmd_path, environ_update=environ_update)
         return None
     elif params["subcommand"] == "global":
         if params["versions"]:
