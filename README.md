@@ -39,7 +39,7 @@ $ pyenv install -l
 $ pyenv versions [--bare]
 $ pyenv global
 $ pyenv global <versions>
-$ pyenv virtualenv [-f|--force] [version] <virtualenv-name>
+$ pyenv virtualenv [-f] [--no-pip] [--no-setuptools] [--no-wheel] [--symlinks] [--copies] [--clear] [--without-pip] [version] <virtualenv-name>
 $ pyenv virtualenvs [--bare] [--skip-aliases]
 ```
 
@@ -115,11 +115,49 @@ The return value of the "virtualenvs" subcommand has "virtualenvs" field.
 
 ### Options of the "virtualenv" subcommand
 
+https://github.com/pyenv/pyenv-virtualenv#virtualenv-and-venv
+
+> `pyenv-virtualenv` uses `python -m venv` if it is available and the `virtualenv` command is not available.
+
+options of the "virtualenv" subcommand depend on whether `pyenv-virtualenv` uses `python -m venv` or not.
+
+#### Common options
+
 parameter | type | required | default | example | description
 --- | --- | --- | --- | --- | ---
 force | bool | no | no | |
 version | str | yes | | 2.7.13 |
 virtualenv_name | str | yes | | ansible |
+
+> ##### Notice: force option doesn't work as expected
+> This is pyenv-virtualenv's problem. 
+>
+> https://github.com/pyenv/pyenv-virtualenv/issues/161
+
+#### `virtualenv` options
+
+parameter | type | required | default | example | description
+--- | --- | --- | --- | --- | ---
+always_copy | bool | no | no | |
+no_pip | bool | no | no | |
+no_setuptools | bool | no | no | |
+no_wheel | bool | no | no | |
+
+See [the virtualenv official documentation](https://virtualenv.pypa.io/en/stable/reference/#virtualenv-command) and the output of the `virtualenv --help` command.
+
+#### `python -m venv` options
+
+parameter | type | required | default | example | description
+--- | --- | --- | --- | --- | ---
+clear | bool | no | no | |
+copies | bool | no | no | |
+symlinks | bool | no | no | |
+without_pip | bool | no | no | |
+
+See [the venv official documentation](https://docs.python.org/3/library/venv.html) and the output of the `python -m venv -h` command.
+
+> ##### Notice: clear option doesn't work as expected
+> This is pyenv-virtualenv's problem. 
 
 ## Example
 

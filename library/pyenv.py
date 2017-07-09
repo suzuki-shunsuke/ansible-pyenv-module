@@ -10,12 +10,30 @@ DOCUMENTATION = '''
 module: pyenv
 short_description: Run pyenv command
 options:
+  always_copy:
+    description:
+    - the "--always-copy" option of pyenv virtualenv
+    required: false
+    type: bool
+    default: false
   bare:
     description:
     - the "--bare" option of "versions" and "virtualenvs" subcommand
     required: false
     type: bool
     default: true
+  clear:
+    description:
+    - the "--clear" option of pyenv virtualenv
+    required: false
+    type: bool
+    default: false
+  copies:
+    description:
+    - the "--copies" option of pyenv virtualenv
+    required: false
+    type: bool
+    default: false
   expanduser:
     description:
     - whether the environment variable PYENV_ROOT and "pyenv_root" option are filtered by os.path.expanduser
@@ -31,6 +49,24 @@ options:
   list:
     description:
     - -l/--list option of pyenv install command
+    required: false
+    type: bool
+    default: false
+  no_pip:
+    description:
+    - the "--no-pip" option of pyenv virtualenv
+    required: false
+    type: bool
+    default: false
+  no_setuptools:
+    description:
+    - the "--no-setuptools" option of pyenv virtualenv
+    required: false
+    type: bool
+    default: false
+  no_wheel:
+    description:
+    - the "--no-wheel" option of pyenv virtualenv
     required: false
     type: bool
     default: false
@@ -58,6 +94,12 @@ options:
     choices: ["install", "uninstall", "versions", "global", "virtualenv", "virtualenvs"]
     required: false
     default: install
+  symlinks:
+    description:
+    - the "--symlinks" option of pyenv virtualenv
+    required: false
+    type: bool
+    default: false
   version:
     description:
     - A python version name
@@ -76,6 +118,12 @@ options:
     type: str
     required: false
     default: null
+  without_pip:
+    description:
+    - the "--without_pip" option of pyenv virtualenv
+    required: false
+    type: bool
+    default: false
 requirements:
 - pyenv
 author: "Suzuki Shunsuke"
@@ -316,12 +364,32 @@ cmd_virtualenvs = wrap_get_func(get_virtualenvs)
 
 
 def cmd_virtualenv(
-        module, cmd_path, version, virtualenv_name, force, **kwargs):
+        module, cmd_path, version, virtualenv_name, options, **kwargs):
     """ pyenv virtualenv [--force] <version> <virtualenv name>
     """
     cmd = [cmd_path, "virtualenv"]
-    if force:
+    
+    for key in [
+            "force", "no_pip", "no_setuptools", "no_wheel", "symlinks",
+            "copies", "clear", "without_pip"]:
+        if options[key]:
+            cmd.append("--{}".format(key.replace("_", "-")))
+    if options["force"]:
+        # pyenv virtualenv --force not working as expected?
+        # https://github.com/pyenv/pyenv-virtualenv/issues/161
         cmd.append("--force")
+        cmd.append(version)
+        cmd.append(virtualenv_name)
+        rc, out, err = module.run_command(cmd, **kwargs)
+        if rc:
+            return module.fail_json(msg=err, stdout=out)
+        else:
+            return module.exit_json(
+                changed=True, failed=False, stdout=out, stderr=err)
+    if options["clear"]:
+        # pyenv virtualenv --clear not working as expected?
+        cmd.append(version)
+        cmd.append(virtualenv_name)
         rc, out, err = module.run_command(cmd, **kwargs)
         if rc:
             return module.fail_json(msg=err, stdout=out)
@@ -379,9 +447,14 @@ def get_pyenv_root(params):
 def main():
     module = AnsibleModule(argument_spec={
         "bare": {"required": False, "type": "bool", "default": True},
+        "copies": {"required": False, "type": "bool", "default": False},
+        "clear": {"required": False, "type": "bool", "default": False},
         "force": {"required": False, "type": "bool", "default": None},
         "expanduser": {"required": False, "type": "bool", "default": True},
         "list": {"required": False, "type": "bool", "default": False},
+        "no_pip": {"required": False, "type": "bool", "default": False},
+        "no_setuptools": {"required": False, "type": "bool", "default": False},
+        "no_wheel": {"required": False, "type": "bool", "default": False},
         "pyenv_root": {"required": False, "default": None},
         "skip_aliases": {"required": False, "type": "bool", "default": True},
         "skip_existing": {"required": False, "type": "bool", "default": None},
@@ -391,9 +464,11 @@ def main():
                 "install", "uninstall", "versions", "global",
                 "virtualenv", "virtualenvs"]
         },
+        "symlinks": {"required": False, "type": "bool", "default": False},
         "version": {"required": False, "type": "str", "default": None},
         "versions": {"required": False, "type": "list", "default": None},
         "virtualenv_name": {"required": False, "type": "str", "default": None},
+        "without_pip": {"required": False, "type": "bool", "default": False},
     })
     params = module.params
     environ_update = {}
@@ -440,9 +515,12 @@ def main():
                 msg=(
                     "virtualenv subcommand requires the 'virtualenv_name' "
                     "parameter"))
+        options = dict((key, params[key]) for key in [
+            "force", "no_pip", "no_setuptools", "no_wheel", "symlinks",
+            "copies", "clear", "without_pip"])
         return cmd_virtualenv(
             module, cmd_path, params["version"], params["virtualenv_name"],
-            params["force"], environ_update=environ_update)
+            options, environ_update=environ_update)
 
 
 if __name__ == '__main__':
