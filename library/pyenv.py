@@ -173,11 +173,10 @@ cmd_versions = wrap_get_func(get_versions)
 def cmd_uninstall(module, cmd_path, version, **kwargs):
     result, data = get_versions(module, cmd_path, **kwargs)
     if not result:
-        module.fail_json(**data)
-        return None
+        return module.fail_json(**data)
     if version not in data["versions"]:
-        module.exit_json(changed=False, failed=False, stdout="", stderr="")
-        return None
+        return module.exit_json(
+            changed=False, failed=False, stdout="", stderr="")
     cmd = [cmd_path, "uninstall", "-f", version]
     rc, out, err = module.run_command(cmd, **kwargs)
     if rc:
@@ -204,13 +203,11 @@ cmd_get_global = wrap_get_func(get_global)
 def cmd_set_global(module, cmd_path, versions, **kwargs):
     result, data = get_global(module, cmd_path, **kwargs)
     if not result:
-        module.fail_json(**data)
-        return None
+        return module.fail_json(**data)
     if set(data["versions"]) == set(versions):
-        module.exit_json(
+        return module.exit_json(
             changed=False, failed=False, stdout="", stderr="",
             versions=versions)
-        return None
     rc, out, err = module.run_command(
         [cmd_path, "global"] + versions, **kwargs)
     if rc:
@@ -269,9 +266,8 @@ def main():
     cmd = [cmd_path, params["subcommand"]]
     if params["subcommand"] == "install":
         if params["list"]:
-            cmd_install_list(
+            return cmd_install_list(
                 module, cmd_path, environ_update=environ_update)
-            return None
         if params["skip_existing"] is None:
             if params["force"] is None:
                 force = False
@@ -295,24 +291,20 @@ def main():
                     force = False
     elif params["subcommand"] == "uninstall":
         if not params["version"]:
-            module.fail_json(
+            return module.fail_json(
                 msg="uninstall subcommand requires the 'version' parameter")
-            return None
-        cmd_uninstall(
+        return cmd_uninstall(
             module, cmd_path, params["version"], environ_update=environ_update)
-        return None
     elif params["subcommand"] == "versions":
-        # get_install_list(module, cmd_path)
-        cmd_versions(module, cmd_path, environ_update=environ_update)
-        return None
+        return cmd_versions(module, cmd_path, environ_update=environ_update)
     elif params["subcommand"] == "global":
         if params["versions"]:
-            cmd_set_global(
+            return cmd_set_global(
                 module, cmd_path, params["versions"],
                 environ_update=environ_update)
         else:
-            cmd_get_global(module, cmd_path, environ_update=environ_update)
-        return None
+            return cmd_get_global(
+                module, cmd_path, environ_update=environ_update)
     cmd.append(params["version"])
 
     rc, out, err = module.run_command(cmd, environ_update=environ_update)
