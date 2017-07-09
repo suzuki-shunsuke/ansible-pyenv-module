@@ -128,6 +128,17 @@ import os  # noqa E402
 from ansible.module_utils.basic import AnsibleModule  # noqa E402
 
 
+def wrap_get_func(func):
+    def wrap(module, *args, **kwargs):
+        result, data = func(module, *args, **kwargs)
+        if result:
+            module.exit_json(**data)
+        else:
+            module.fail_json(**data)
+
+    return wrap
+
+
 def get_install_list(module, cmd_path, **kwargs):
     rc, out, err = module.run_command([cmd_path, "install", "-l"], **kwargs)
     if rc:
@@ -140,12 +151,7 @@ def get_install_list(module, cmd_path, **kwargs):
             versions=versions))
 
 
-def cmd_install_list(module, cmd_path, **kwargs):
-    result, data = get_install_list(module, cmd_path, **kwargs)
-    if result:
-        module.exit_json(**data)
-    else:
-        module.fail_json(**data)
+cmd_install_list = wrap_get_func(get_install_list)
 
 
 def get_versions(module, cmd_path, **kwargs):
@@ -161,12 +167,7 @@ def get_versions(module, cmd_path, **kwargs):
             versions=versions))
 
 
-def cmd_versions(module, cmd_path, **kwargs):
-    result, data = get_versions(module, cmd_path, **kwargs)
-    if result:
-        module.exit_json(**data)
-    else:
-        module.fail_json(**data)
+cmd_versions = wrap_get_func(get_versions)
 
 
 def cmd_uninstall(module, cmd_path, version, **kwargs):
@@ -197,12 +198,7 @@ def get_global(module, cmd_path, **kwargs):
             versions=versions))
 
 
-def cmd_get_global(module, cmd_path, **kwargs):
-    result, data = get_global(module, cmd_path, **kwargs)
-    if result:
-        module.exit_json(**data)
-    else:
-        module.fail_json(**data)
+cmd_get_global = wrap_get_func(get_global)
 
 
 def cmd_set_global(module, cmd_path, versions, **kwargs):
