@@ -85,10 +85,70 @@
     register: result
   - debug:
       var: result
+  - name: pyenv virtualenv --symlinks 3.6.1 neovim-symlinks
+    pyenv:
+      subcommand: virtualenv
+      pyenv_root: "{{pyenv_root}}"
+      version: 3.6.1
+      virtualenv_name: neovim-symlinks
+      symlinks: yes
+    register: result
+  - debug:
+      var: result
+  - name: pyenv virtualenv --copies 3.6.1 neovim-copies
+    pyenv:
+      subcommand: virtualenv
+      pyenv_root: "{{pyenv_root}}"
+      version: 3.6.1
+      virtualenv_name: neovim-copies
+      copies: yes
+    register: result
+  - debug:
+      var: result
+  - name: pyenv virtualenv --without-pip 3.6.1 neovim-without-pip
+    pyenv:
+      subcommand: virtualenv
+      pyenv_root: "{{pyenv_root}}"
+      version: 3.6.1
+      virtualenv_name: neovim-without-pip
+      without_pip: yes
+    register: result
+  - debug:
+      var: result
   - name: pyenv install -s 2.7.13
     pyenv:
       version: 2.7.13
       pyenv_root: "{{pyenv_root}}"
+    register: result
+  - debug:
+      var: result
+  - name: pyenv virtualenv --no-wheel 2.7.13 neovim-no-wheel
+    pyenv:
+      subcommand: virtualenv
+      pyenv_root: "{{pyenv_root}}"
+      version: 2.7.13
+      virtualenv_name: neovim-no-wheel
+      no_wheel: yes
+    register: result
+  - debug:
+      var: result
+  - name: pyenv virtualenv --no-setuptools 2.7.13 neovim-no-setuptools
+    pyenv:
+      subcommand: virtualenv
+      pyenv_root: "{{pyenv_root}}"
+      version: 2.7.13
+      virtualenv_name: neovim-no-setuptools
+      no_setuptools: yes
+    register: result
+  - debug:
+      var: result
+  - name: pyenv virtualenv --no-pip 2.7.13 neovim-no-pip
+    pyenv:
+      subcommand: virtualenv
+      pyenv_root: "{{pyenv_root}}"
+      version: 2.7.13
+      virtualenv_name: neovim-no-pip
+      no_pip: yes
     register: result
   - debug:
       var: result
