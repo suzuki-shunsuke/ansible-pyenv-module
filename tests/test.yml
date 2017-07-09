@@ -71,7 +71,6 @@
   - name: pyenv install -s 3.6.1
     pyenv:
       version: 3.6.1
-      # force: yes
       pyenv_root: "{{pyenv_root}}"
     register: result
   - debug:
@@ -85,6 +84,10 @@
     register: result
   - debug:
       var: result
+  - name: install neovim on the virtualenv "neovim"
+    pip:
+      name: neovim
+      executable: "{{pyenv_root}}/versions/neovim/bin/pip"
   - name: pyenv virtualenv --symlinks 3.6.1 neovim-symlinks
     pyenv:
       subcommand: virtualenv
@@ -122,6 +125,10 @@
     register: result
   - debug:
       var: result
+  - name: install PyYAML on python 2.7.13
+    pip:
+      name: pyyaml
+      executable: "{{pyenv_root}}/versions/2.7.13/bin/pip"
   - name: pyenv virtualenv --no-wheel 2.7.13 neovim-no-wheel
     pyenv:
       subcommand: virtualenv
