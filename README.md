@@ -227,6 +227,37 @@ See [the venv official documentation](https://docs.python.org/3/library/venv.htm
     force: yes
 ```
 
+## Tips
+
+### Install python packages with pip
+
+Now this module doesn't support `pip` subcommand,
+but you can do it with [the official pip module](http://docs.ansible.com/ansible/pip_module.html).
+
+```yaml
+# install python and create virtualenv before using pip module
+- name: pyenv install -s 2.7.13
+  pyenv:
+    pyenv_root: "{{pyenv_root}}"
+    version: 2.7.13
+- name: pyenv virtualenv 3.6.1 yaml_env
+  pyenv:
+    subcommand: virtualenv
+    pyenv_root: "{{pyenv_root}}"
+    version: 3.6.1
+    virtualenv_name: yaml_env
+
+# use pip module with executable option
+- name: install ansible
+  pip:
+    name: ansible
+    executable: "{{pyenv_root}}/versions/2.7.13/bin/pip"
+- name: install pyyaml on the virtualenv "yaml_env"
+  pip:
+    name: pyyaml
+    executable: "{{pyenv_root}}/versions/yaml_env/bin/pip"
+```
+
 ## Change Log
 
 See [CHANGELOG.md](CHANGELOG.md).
