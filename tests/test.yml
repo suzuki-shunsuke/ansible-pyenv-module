@@ -12,7 +12,7 @@
       list: yes
       pyenv_root: "{{pyenv_root}}"
     register: result
-    failed_when: result.changed
+    failed_when: result.failed or result.changed
   - debug:
       var: result
   - name: pyenv global
@@ -20,7 +20,7 @@
       subcommand: global
       pyenv_root: "{{pyenv_root}}"
     register: result
-    failed_when: result.changed
+    failed_when: result.failed or result.changed
   - debug:
       var: result
   - name: pyenv versions --bare
@@ -28,7 +28,7 @@
       subcommand: versions
       pyenv_root: "{{pyenv_root}}"
     register: result
-    failed_when: result.changed
+    failed_when: result.failed or result.changed
   - debug:
       var: result
   - name: pyenv install -s 3.6.1
@@ -61,7 +61,7 @@
       subcommand: global
       pyenv_root: "{{pyenv_root}}"
     register: result
-    failed_when: result.changed
+    failed_when: result.failed or result.changed
   - debug:
       var: result
   - name: pyenv global 2.7.13
@@ -71,7 +71,7 @@
       - 2.7.13
       pyenv_root: "{{pyenv_root}}"
     register: result
-    failed_when: not result.changed
+    failed_when: result.failed or not result.changed
   - debug:
       var: result
   - name: pyenv install -s 2.7.5
@@ -88,7 +88,7 @@
     environment:
       PYENV_ROOT: "{{pyenv_root}}"
     register: result
-    failed_when: result.changed
+    failed_when: result.failed or result.changed
   - debug:
       var: result
   - name: pyenv uninstall -f 2.7.5
@@ -98,6 +98,6 @@
     environment:
       PYENV_ROOT: "~/pyenv"
     register: result
-    failed_when: not result.changed
+    failed_when: result.failed or not result.changed
   - debug:
       var: result
