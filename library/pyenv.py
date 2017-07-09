@@ -160,6 +160,8 @@ def wrap_get_func(func):
 
 
 def get_install_list(module, cmd_path, **kwargs):
+    """ pyenv install --list
+    """
     rc, out, err = module.run_command([cmd_path, "install", "-l"], **kwargs)
     if rc:
         return (False, dict(msg=err, stdout=out))
@@ -175,6 +177,8 @@ cmd_install_list = wrap_get_func(get_install_list)
 
 
 def get_versions(module, cmd_path, bare, **kwargs):
+    """ pyenv versions [--bare]
+    """
     cmd = [cmd_path, "versions"]
     if bare:
         cmd.append("--bare")
@@ -193,6 +197,8 @@ cmd_versions = wrap_get_func(get_versions)
 
 
 def cmd_uninstall(module, cmd_path, version, **kwargs):
+    """ pyenv uninstall --force <version>
+    """
     result, data = get_versions(module, cmd_path, True, **kwargs)
     if not result:
         return module.fail_json(**data)
@@ -208,6 +214,8 @@ def cmd_uninstall(module, cmd_path, version, **kwargs):
 
 
 def get_global(module, cmd_path, **kwargs):
+    """ pyenv global
+    """
     rc, out, err = module.run_command([cmd_path, "global"], **kwargs)
     if rc:
         return (False, dict(msg=err, stdout=out))
@@ -223,6 +231,8 @@ cmd_get_global = wrap_get_func(get_global)
 
 
 def cmd_set_global(module, cmd_path, versions, **kwargs):
+    """ pyenv global <version> [<version> ...]
+    """
     result, data = get_global(module, cmd_path, **kwargs)
     if not result:
         return module.fail_json(**data)
@@ -241,6 +251,8 @@ def cmd_set_global(module, cmd_path, versions, **kwargs):
 
 
 def cmd_install(module, params, cmd_path, **kwargs):
+    """ pyenv install [--skip-existing] [--force] <version>
+    """
     cmd = [cmd_path, "install"]
     if params["skip_existing"] is not False:
         force = False
@@ -261,6 +273,8 @@ def cmd_install(module, params, cmd_path, **kwargs):
 
 
 def get_virtualenvs(module, cmd_path, skip_aliases, bare, **kwargs):
+    """ pyenv virtualenvs [--skip-aliases] [--bare]
+    """
     cmd = [cmd_path, "virtualenvs"]
     if skip_aliases:
         cmd.append("--skip-aliases")
