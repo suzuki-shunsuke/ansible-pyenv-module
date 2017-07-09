@@ -136,7 +136,8 @@ def get_all_installable_versions(module, cmd_path, **kwargs):
         # slice: remove header and last newline
         versions = [line.strip() for line in out.split("\n")[1:-1]]
         return (True, dict(
-            changed=False, versions=versions, stdout=out, stderr=err))
+            changed=False, failed=False, stdout=out, stderr=err,
+            versions=versions))
 
 
 def cmd_all_installable_versions(module, cmd_path, **kwargs):
@@ -156,7 +157,8 @@ def get_installed_versions(module, cmd_path, **kwargs):
         # slice: remove last newline
         versions = [line.strip() for line in out.split("\n")[:-1]]
         return (True, dict(
-            changed=False, versions=versions, stdout=out, stderr=err))
+            changed=False, failed=False, stdout=out, stderr=err,
+            versions=versions))
 
 
 def cmd_installed_versions(module, cmd_path, **kwargs):
@@ -173,14 +175,14 @@ def cmd_uninstall(module, cmd_path, version, **kwargs):
         module.fail_json(**data)
         return None
     if version not in data["versions"]:
-        module.exit_json(changed=False, stdout="", stderr="")
+        module.exit_json(changed=False, failed=False, stdout="", stderr="")
         return None
     cmd = [cmd_path, "uninstall", "-f", version]
     rc, out, err = module.run_command(cmd, **kwargs)
     if rc:
         module.fail_json(msg=err, stdout=out)
     else:
-        module.exit_json(changed=True, stdout=out, stderr=err)
+        module.exit_json(changed=True, failed=False, stdout=out, stderr=err)
 
 
 def get_global(module, cmd_path, **kwargs):
@@ -191,7 +193,8 @@ def get_global(module, cmd_path, **kwargs):
         # slice: remove last newline
         versions = [line.strip() for line in out.split("\n")[:-1]]
         return (True, dict(
-            changed=False, versions=versions, stdout=out, stderr=err))
+            changed=False, failed=False, stdout=out, stderr=err,
+            versions=versions))
 
 
 def cmd_get_global(module, cmd_path, **kwargs):
@@ -209,7 +212,8 @@ def cmd_set_global(module, cmd_path, versions, **kwargs):
         return None
     if set(data["versions"]) == set(versions):
         module.exit_json(
-            versions=versions, changed=False, stdout="", stderr="")
+            changed=False, failed=False, stdout="", stderr="",
+            versions=versions)
         return None
     rc, out, err = module.run_command(
         [cmd_path, "global"] + versions, **kwargs)
@@ -217,7 +221,8 @@ def cmd_set_global(module, cmd_path, versions, **kwargs):
         module.fail_json(msg=err, stdout=out)
     else:
         module.exit_json(
-            versions=versions, changed=True, stdout=out, stderr=err)
+            changed=True, failed=False, stdout=out, stderr=err,
+            versions=versions)
 
 
 MSGS = {
@@ -320,7 +325,7 @@ def main():
                 changed = True
             else:
                 changed = False
-        module.exit_json(changed=changed, stdout=out, stderr=err)
+        module.exit_json(changed=changed, failed=False, stdout=out, stderr=err)
 
 
 if __name__ == '__main__':
