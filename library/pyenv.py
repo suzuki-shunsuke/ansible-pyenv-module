@@ -148,6 +148,13 @@ EXAMPLES = '''
 '''
 
 RETURNS = '''
+virtualenvs:
+  description: the return value of `pyenv virtualenvs`
+  returned: success
+  type: list
+  sample:
+  - 3.6.1/envs/neovim
+  - neovim
 versions:
   description: the return value of `pyenv install --list` or `pyenv global` or `pyenv versions`
   returned: success
