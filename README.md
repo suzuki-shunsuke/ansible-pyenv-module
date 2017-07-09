@@ -148,7 +148,7 @@ The return value of the "virtualenvs" subcommand has "virtualenvs" field.
     pyenv_root: "~/.pyenv"
   register: result
 - debug:
-    var: result["versions"]
+    var: result.versions
 
 - name: pyenv install -l
   pyenv:
@@ -156,7 +156,7 @@ The return value of the "virtualenvs" subcommand has "virtualenvs" field.
     pyenv_root: "{{ansible_env.HOME}}/.pyenv"
   register: result
 - debug:
-    var: result["versions"]
+    var: result.versions
 
 - name: pyenv versions --bare
   pyenv:
@@ -164,7 +164,7 @@ The return value of the "virtualenvs" subcommand has "virtualenvs" field.
     pyenv_root: "{{ansible_env.HOME}}/.pyenv"
   register: result
 - debug:
-    var: result["versions"]
+    var: result.versions
 
 - name: pyenv virtualenvs --skip-aliases --bare
   pyenv:
@@ -172,7 +172,7 @@ The return value of the "virtualenvs" subcommand has "virtualenvs" field.
     pyenv_root: "~/.pyenv"
   register: result
 - debug:
-    var: result["virtualenvs"]
+    var: result.virtualenvs
 ```
 
 ## Change Log

@@ -106,7 +106,7 @@ EXAMPLES = '''
     pyenv_root: "~/.pyenv"
   register: result
 - debug:
-    var: result["versions"]
+    var: result.versions
 
 - name: pyenv install -l
   pyenv:
@@ -114,7 +114,7 @@ EXAMPLES = '''
     pyenv_root: "~/.pyenv"
   register: result
 - debug:
-    var: result["versions"]
+    var: result.versions
 
 - name: pyenv versions --bare
   pyenv:
@@ -122,7 +122,7 @@ EXAMPLES = '''
     pyenv_root: "~/.pyenv"
   register: result
 - debug:
-    var: result["versions"]
+    var: result.versions
 
 - name: pyenv virtualenvs --skip-aliases --bare
   pyenv:
@@ -130,7 +130,7 @@ EXAMPLES = '''
     pyenv_root: "~/.pyenv"
   register: result
 - debug:
-    var: result["virtualenvs"]
+    var: result.virtualenvs
 '''
 
 RETURNS = '''
