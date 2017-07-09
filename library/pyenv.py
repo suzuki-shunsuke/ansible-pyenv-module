@@ -126,7 +126,6 @@ versions:
 import os  # noqa E402
 
 from ansible.module_utils.basic import AnsibleModule  # noqa E402
-import yaml
 
 
 def get_all_installable_versions(module, cmd_path, **kwargs):
@@ -229,10 +228,19 @@ MSGS = {
 
 
 def main():
-    argument_spec = yaml.load(DOCUMENTATION)["options"]
-    argument_spec["force"]["default"] = None
-    argument_spec["skip"]["default"] = None
-    module = AnsibleModule(argument_spec=argument_spec)
+    module = AnsibleModule(argument_spec={
+        "version": {"required": False, "type": "str", "default": None},
+        "versions": {"required": False, "type": "list", "default": None},
+        "pyenv_root": {"required": False, "default": None},
+        "subcommand": {
+            "required": False, "default": "install",
+            "choices": ["install", "uninstall", "versions", "global"]
+        },
+        "force": {"required": False, "type": "bool", "default": None},
+        "skip": {"required": False, "type": "bool", "default": None},
+        "expanduser": {"required": False, "type": "bool", "default": True},
+        "list": {"required": False, "type": "bool", "default": False},
+    })
     params = module.params
     environ_update = {}
     if params["pyenv_root"]:
