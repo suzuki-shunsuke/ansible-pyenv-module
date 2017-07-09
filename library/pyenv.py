@@ -128,7 +128,7 @@ import os  # noqa E402
 from ansible.module_utils.basic import AnsibleModule  # noqa E402
 
 
-def get_all_installable_versions(module, cmd_path, **kwargs):
+def get_install_list(module, cmd_path, **kwargs):
     rc, out, err = module.run_command([cmd_path, "install", "-l"], **kwargs)
     if rc:
         return (False, dict(msg=err, stdout=out))
@@ -140,8 +140,8 @@ def get_all_installable_versions(module, cmd_path, **kwargs):
             versions=versions))
 
 
-def cmd_all_installable_versions(module, cmd_path, **kwargs):
-    result, data = get_all_installable_versions(module, cmd_path, **kwargs)
+def cmd_install_list(module, cmd_path, **kwargs):
+    result, data = get_install_list(module, cmd_path, **kwargs)
     if result:
         module.exit_json(**data)
     else:
@@ -268,7 +268,7 @@ def main():
     cmd = [cmd_path, params["subcommand"]]
     if params["subcommand"] == "install":
         if params["list"]:
-            cmd_all_installable_versions(
+            cmd_install_list(
                 module, cmd_path, environ_update=environ_update)
             return None
         if params["skip_existing"] is None:
@@ -301,7 +301,7 @@ def main():
             module, cmd_path, params["version"], environ_update=environ_update)
         return None
     elif params["subcommand"] == "versions":
-        # get_all_installable_versions(module, cmd_path)
+        # get_install_list(module, cmd_path)
         cmd_installed_versions(module, cmd_path, environ_update=environ_update)
         return None
     elif params["subcommand"] == "global":
