@@ -1,0 +1,17 @@
+{
+  "name": "ansible-pyenv-module",
+  "description": "ansible module to run pyenv command",
+  "author": "Suzuki Shunsuke <suzuki.shunsuke.1989@gmail.com>",
+  "license": "MIT",
+  "repository": "https://github.com/suzuki-shunsuke/ansible-pyenv-module",
+  "version": "1.0.1",
+  "scripts": {
+    "release": "standard-version",
+    "commitmsg": "validate-commit-msg"
+  },
+  "devDependencies": {
+    "husky": "^0.14.3",
+    "standard-version": "^4.2.0",
+    "validate-commit-msg": "^2.12.2"
+  }
+}

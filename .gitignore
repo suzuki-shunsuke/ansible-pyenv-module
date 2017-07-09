@@ -1,3 +1,6 @@
+# Common
+**/*.log
+
 # Mac
 .DS_Store
 
@@ -11,3 +14,6 @@ tests/_roles/*
 
 # Python
 *.pyc
+
+# Node.js
+node_modules
