@@ -5,8 +5,45 @@
   roles:
   - git
   - suzuki-shunsuke.pyenv
+  - suzuki-shunsuke.pyenv-virtualenv
   - ansible-pyenv-module
   tasks:
+  - name: pyenv virtualenvs --skip-aliases --bare
+    pyenv:
+      subcommand: virtualenvs
+      pyenv_root: "{{pyenv_root}}"
+    register: result
+    failed_when: result.failed or result.changed
+  - debug:
+      var: result
+  - name: pyenv virtualenvs --skip-aliases
+    pyenv:
+      subcommand: virtualenvs
+      pyenv_root: "{{pyenv_root}}"
+      bare: no
+    register: result
+    failed_when: result.failed or result.changed
+  - debug:
+      var: result
+  - name: pyenv virtualenvs --bare
+    pyenv:
+      subcommand: virtualenvs
+      pyenv_root: "{{pyenv_root}}"
+      skip_aliases: no
+    register: result
+    failed_when: result.failed or result.changed
+  - debug:
+      var: result
+  - name: pyenv virtualenvs
+    pyenv:
+      subcommand: virtualenvs
+      pyenv_root: "{{pyenv_root}}"
+      bare: no
+      skip_aliases: no
+    register: result
+    failed_when: result.failed or result.changed
+  - debug:
+      var: result
   - name: pyenv install -l
     pyenv:
       list: yes

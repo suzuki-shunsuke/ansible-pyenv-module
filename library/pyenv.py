@@ -12,7 +12,7 @@ short_description: Run pyenv command
 options:
   bare:
     description:
-    - the "--bare" option of versions subcommand
+    - the "--bare" option of "versions" and "virtualenvs" subcommand
     required: false
     type: bool
     default: true
@@ -40,6 +40,12 @@ options:
     required: false
     type: str
     default: null
+  skip_aliases:
+    description:
+    - the "-s/--skip-aliases" option of pyenv virtualenvs
+    required: false
+    type: bool
+    default: true
   skip_existing:
     description:
     - the "-s/--skip-existing" option of pyenv install
@@ -49,7 +55,7 @@ options:
   subcommand:
     description:
     - pyenv subcommand
-    choices: ["install", "uninstall", "versions", "global"]
+    choices: ["install", "uninstall", "versions", "global", "virtualenvs"]
     required: false
     default: install
   version:
@@ -105,7 +111,7 @@ EXAMPLES = '''
 - name: pyenv install -l
   pyenv:
     list: yes
-    pyenv_root: "{{ansible_env.HOME}}/.pyenv"
+    pyenv_root: "~/.pyenv"
   register: result
 - debug:
     var: result["versions"]
@@ -113,10 +119,18 @@ EXAMPLES = '''
 - name: pyenv versions --bare
   pyenv:
     subcommand: versions
-    pyenv_root: "{{ansible_env.HOME}}/.pyenv"
+    pyenv_root: "~/.pyenv"
   register: result
 - debug:
     var: result["versions"]
+
+- name: pyenv virtualenvs --skip-aliases --bare
+  pyenv:
+    subcommand: virtualenvs
+    pyenv_root: "~/.pyenv"
+  register: result
+- debug:
+    var: result["virtualenvs"]
 '''
 
 RETURNS = '''
@@ -246,6 +260,26 @@ def cmd_install(module, params, cmd_path, **kwargs):
             changed=changed, failed=False, stdout=out, stderr=err)
 
 
+def get_virtualenvs(module, cmd_path, skip_aliases, bare, **kwargs):
+    cmd = [cmd_path, "virtualenvs"]
+    if skip_aliases:
+        cmd.append("--skip-aliases")
+    if bare:
+        cmd.append("--bare")
+    rc, out, err = module.run_command(cmd, **kwargs)
+    if rc:
+        return (False, dict(msg=err, stdout=out))
+    else:
+        # slice: remove last newline
+        virtualenvs = [line.strip() for line in out.split("\n")[:-1]]
+        return (True, dict(
+            changed=False, failed=False, stdout=out, stderr=err,
+            virtualenvs=virtualenvs))
+
+
+cmd_virtualenvs = wrap_get_func(get_virtualenvs)
+
+
 MSGS = {
     "required_pyenv_root": (
         "Either the environment variable 'PYENV_ROOT' "
@@ -275,10 +309,12 @@ def main():
         "expanduser": {"required": False, "type": "bool", "default": True},
         "list": {"required": False, "type": "bool", "default": False},
         "pyenv_root": {"required": False, "default": None},
+        "skip_aliases": {"required": False, "type": "bool", "default": True},
         "skip_existing": {"required": False, "type": "bool", "default": None},
         "subcommand": {
             "required": False, "default": "install",
-            "choices": ["install", "uninstall", "versions", "global"]
+            "choices": [
+                "install", "uninstall", "versions", "global", "virtualenvs"]
         },
         "version": {"required": False, "type": "str", "default": None},
         "versions": {"required": False, "type": "list", "default": None},
@@ -315,6 +351,10 @@ def main():
         else:
             return cmd_get_global(
                 module, cmd_path, environ_update=environ_update)
+    elif params["subcommand"] == "virtualenvs":
+        return cmd_virtualenvs(
+            module, cmd_path, params["skip_aliases"], params["bare"],
+            environ_update=environ_update)
 
 
 if __name__ == '__main__':
