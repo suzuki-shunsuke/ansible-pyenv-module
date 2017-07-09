@@ -1,5 +1,0 @@
-- name: Install git
-  yum:
-    name: git
-    update_cache: yes
-  become: "{{nonroot}}"

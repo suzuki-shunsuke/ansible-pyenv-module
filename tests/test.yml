@@ -3,7 +3,8 @@
   vars_files:
   - vars/main.yml
   roles:
-  - git
+  - role: geerlingguy.git
+    become: "{{nonroot}}"
   - suzuki-shunsuke.pyenv
   - suzuki-shunsuke.pyenv-virtualenv
   - ansible-pyenv-module
