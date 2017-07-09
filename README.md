@@ -25,8 +25,10 @@ We test this module in
 
 * [pyenv](https://github.com/pyenv/pyenv)
 * [python build dependencies](https://github.com/pyenv/pyenv/wiki/Common-build-problems#requirements)
+* [pyenv-virtualenv](https://github.com/pyenv/pyenv-virtualenv): required if you want to run `virtualenvs` subcommand
 
 If you want to install pyenv and python build dependencies with ansible role, we recommend the [suzuki-shunsuke.pyenv](https://galaxy.ansible.com/suzuki-shunsuke/pyenv/).
+And if you want to install pyenv-virtualenv with ansible role, we recommend the [suzuki-shunsuke.pyenv-virtualenv](https://galaxy.ansible.com/suzuki-shunsuke/pyenv-virtualenv/).
 
 ## Supported pyenv subcommands and options
 
@@ -34,9 +36,10 @@ If you want to install pyenv and python build dependencies with ansible role, we
 $ pyenv install [-s] [-f] <version>
 $ pyenv uninstall -f <version>
 $ pyenv install -l
-$ pyenv versions --bare
+$ pyenv versions [--bare]
 $ pyenv global
 $ pyenv global <versions>
+$ pyenv virtualenvs [--bare] [--skip-aliases]
 ```
 
 ## Install
@@ -65,7 +68,7 @@ In addition to this document, please see [pyenv command reference](https://githu
 
 name | type | required | default | choices / example | description
 --- | --- | --- | --- | --- | ---
-subcommand | str | no | install | [install, uninstall, versions, global] |
+subcommand | str | no | install | [install, uninstall, versions, global, virtualenvs] |
 pyenv_root | str | no | | ~/.pyenv | If the environment variable "PYENV_ROOT" is not set, this option is required
 expanduser | bool | no | yes | | By default the environment variable PYENV_ROOT and "pyenv_root" option are filtered by [os.path.expanduser](https://docs.python.org/2.7/library/os.path.html#os.path.expanduser)
 
@@ -97,9 +100,20 @@ The return value of the "global" subcommand has "versions" field.
 
 ### Options of the "versions" subcommand
 
-Nothing.
+parameter | type | required | default | choices | description
+--- | --- | --- | --- | --- | ---
+bare | bool | no | yes | |
 
 The return value of the "versions" subcommand has "versions" field.
+
+### Options of the "virtualenvs" subcommand
+
+parameter | type | required | default | choices | description
+--- | --- | --- | --- | --- | ---
+skip_aliases | bool | no | yes | |
+bare | bool | no | yes | |
+
+The return value of the "virtualenvs" subcommand has "virtualenvs" field.
 
 ## Example
 
@@ -134,7 +148,7 @@ The return value of the "versions" subcommand has "versions" field.
     pyenv_root: "~/.pyenv"
   register: result
 - debug:
-    var: result["versions"]
+    var: result.versions
 
 - name: pyenv install -l
   pyenv:
@@ -142,7 +156,7 @@ The return value of the "versions" subcommand has "versions" field.
     pyenv_root: "{{ansible_env.HOME}}/.pyenv"
   register: result
 - debug:
-    var: result["versions"]
+    var: result.versions
 
 - name: pyenv versions --bare
   pyenv:
@@ -150,7 +164,15 @@ The return value of the "versions" subcommand has "versions" field.
     pyenv_root: "{{ansible_env.HOME}}/.pyenv"
   register: result
 - debug:
-    var: result["versions"]
+    var: result.versions
+
+- name: pyenv virtualenvs --skip-aliases --bare
+  pyenv:
+    subcommand: virtualenvs
+    pyenv_root: "~/.pyenv"
+  register: result
+- debug:
+    var: result.virtualenvs
 ```
 
 ## Change Log
