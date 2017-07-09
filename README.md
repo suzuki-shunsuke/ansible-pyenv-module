@@ -75,7 +75,7 @@ parameter | type | required | default | choices / example | description
 --- | --- | --- | --- | --- | ---
 version | str | no | | 3.6.1 |
 list | bool | no | no | | -l option
-skip | bool | no | yes | | -s option
+skip_existing | bool | no | yes | | -s option
 force | bool | no | no | | -f option
 
 Either "version" or "list" option is required.

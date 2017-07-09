@@ -34,7 +34,7 @@ options:
     required: false
     type: str
     default: null
-  skip:
+  skip_existing:
     description:
     - the "-s/--skip-existing" option of pyenv install
     required: false
@@ -242,7 +242,7 @@ def main():
             "choices": ["install", "uninstall", "versions", "global"]
         },
         "force": {"required": False, "type": "bool", "default": None},
-        "skip": {"required": False, "type": "bool", "default": None},
+        "skip_existing": {"required": False, "type": "bool", "default": None},
         "expanduser": {"required": False, "type": "bool", "default": True},
         "list": {"required": False, "type": "bool", "default": False},
     })
@@ -271,7 +271,7 @@ def main():
             cmd_all_installable_versions(
                 module, cmd_path, environ_update=environ_update)
             return None
-        if params["skip"] is None:
+        if params["skip_existing"] is None:
             if params["force"] is None:
                 force = False
                 cmd.append("-s")
@@ -282,11 +282,11 @@ def main():
                 force = False
                 cmd.append("-s")
         else:
-            if params["skip"] is True:
+            if params["skip_existing"] is True:
                 force = False
                 cmd.append("-s")
             else:
-                # skip: False
+                # skip_existing: False
                 if params["force"] is True:
                     force = True
                     cmd.append("-f")
