@@ -34,7 +34,7 @@ If you want to install pyenv and python build dependencies with ansible role, we
 $ pyenv install [-s] [-f] <version>
 $ pyenv uninstall -f <version>
 $ pyenv install -l
-$ pyenv versions --bare
+$ pyenv versions [--bare]
 $ pyenv global
 $ pyenv global <versions>
 ```
@@ -97,7 +97,9 @@ The return value of the "global" subcommand has "versions" field.
 
 ### Options of the "versions" subcommand
 
-Nothing.
+parameter | type | required | default | choices | description
+--- | --- | --- | --- | --- | ---
+bare | bool | no | yes | |
 
 The return value of the "versions" subcommand has "versions" field.
 

@@ -10,6 +10,12 @@ DOCUMENTATION = '''
 module: pyenv
 short_description: Run pyenv command
 options:
+  bare:
+    description:
+    - the "--bare" option of versions subcommand
+    required: false
+    type: bool
+    default: true
   expanduser:
     description:
     - whether the environment variable PYENV_ROOT and "pyenv_root" option are filtered by os.path.expanduser
@@ -154,9 +160,11 @@ def get_install_list(module, cmd_path, **kwargs):
 cmd_install_list = wrap_get_func(get_install_list)
 
 
-def get_versions(module, cmd_path, **kwargs):
-    rc, out, err = module.run_command(
-        [cmd_path, "versions", "--bare"], **kwargs)
+def get_versions(module, cmd_path, bare, **kwargs):
+    cmd = [cmd_path, "versions"]
+    if bare:
+        cmd.append("--bare")
+    rc, out, err = module.run_command(cmd, **kwargs)
     if rc:
         return (False, dict(msg=err, stdout=out))
     else:
@@ -262,6 +270,7 @@ def get_pyenv_root(params):
 
 def main():
     module = AnsibleModule(argument_spec={
+        "bare": {"required": False, "type": "bool", "default": True},
         "force": {"required": False, "type": "bool", "default": None},
         "expanduser": {"required": False, "type": "bool", "default": True},
         "list": {"required": False, "type": "bool", "default": False},
@@ -296,7 +305,8 @@ def main():
         return cmd_uninstall(
             module, cmd_path, params["version"], environ_update=environ_update)
     elif params["subcommand"] == "versions":
-        return cmd_versions(module, cmd_path, environ_update=environ_update)
+        return cmd_versions(
+            module, cmd_path, params["bare"], environ_update=environ_update)
     elif params["subcommand"] == "global":
         if params["versions"]:
             return cmd_set_global(
