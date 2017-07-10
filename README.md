@@ -38,7 +38,7 @@ $ pyenv uninstall -f <version>
 $ pyenv install -l
 $ pyenv versions [--bare]
 $ pyenv global
-$ pyenv global <versions>
+$ pyenv global <version> [<version> ...]
 $ pyenv virtualenv [-f] [--no-pip] [--no-setuptools] [--no-wheel] [--symlinks] [--copies] [--clear] [--without-pip] [version] <virtualenv-name>
 $ pyenv virtualenvs [--bare] [--skip-aliases]
 ```
