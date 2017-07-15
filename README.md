@@ -262,6 +262,11 @@ but you can do it with [the official pip module](http://docs.ansible.com/ansible
 
 See [CHANGELOG.md](CHANGELOG.md).
 
+## See also
+
+* [suzuki-shunsuke.pyenv](https://github.com/suzuki-shunsuke/ansible-pyenv): ansible role to install pyenv
+* [suzuki-shunsuke.pyenv-virtualenv](https://github.com/suzuki-shunsuke/ansible-pyenv-virtualenv): ansible role to install pyenv-virtualenv
+
 ## Licence
 
 [MIT](LICENSE)
