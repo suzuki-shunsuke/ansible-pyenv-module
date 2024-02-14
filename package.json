@@ -10,7 +10,7 @@
     "commitmsg": "validate-commit-msg"
   },
   "devDependencies": {
-    "husky": "4.2.5",
+    "husky": "9.0.11",
     "standard-version": "8.0.1",
     "validate-commit-msg": "2.14.0"
   }
